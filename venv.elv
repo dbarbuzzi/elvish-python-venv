@@ -3,6 +3,7 @@ use re
 use str
 
 var prev = [&paths=$nil &pythonhome=$nil]
+var candidates = [.env .venv env venv pyenv ENV]
 
 fn is-venv {
   |path|
@@ -48,13 +49,35 @@ fn deactivate {
   echo 'venv: deactivated: '(pretty-path $venv) >&2
 }
 
+fn usage {
+    put "usage: venv:activate [<path/to/venv>]
+
+Activate a Python virtual environment created by virtualenv or venv.
+If no path is given, the following will be tried:
+ ./"(str:join "\n ./" $candidates)"\n"
+}
+
 fn activate {
-  |venv|
-  if (eq $venv '') {
-    fail 'usage: venv:activate <path/to/venv>'
+  |@args|
+  var venv = ''
+  if (== (count $args) 0) {
+    for candidate $candidates {
+      if (is-venv $candidate) {
+        set venv = $candidate
+        break
+      }
+    }
+  } elif (== (count $args) 1) {
+    set venv = $args[0]
   }
+
   if (not (is-venv $venv)) {
-    fail 'venv: not a venv: '$venv
+    echo (usage)
+    if (eq $venv '') {
+      fail 'venv: no venv found'
+    } else {
+      fail 'venv: not a venv: '$venv
+    }
   }
   if (not-eq $E:VIRTUAL_ENV '') {
     deactivate

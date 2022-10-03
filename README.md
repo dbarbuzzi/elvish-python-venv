@@ -11,17 +11,21 @@ epm:install github.com/elijahr/elvish-python-venv
 Then put this in `~/.config/elvish/rc.elv`:
 
 ```
-fn activate {|name| venv:activate $name }
+# setup aliases for working with Python virtual environments
+use github.com/elijahr/elvish-python-venv/venv
+var venv~ = venv:activate~
+var activate~ = venv:activate~
+var deactivate~ = venv:deactivate~
+set edit:completion:arg-completer[venv] =
 set edit:completion:arg-completer[activate] = $edit:completion:arg-completer[venv:activate]
-fn deactivate { venv:deactivate }
 ```
 
-## usage
+## example usage
 
 create a venv or virtualenv
 
 ```shell
-python -m my-venv
+python -m venv .venv
 ```
 
 activate the venv
