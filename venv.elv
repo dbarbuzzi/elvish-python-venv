@@ -54,7 +54,7 @@ fn usage {
 
 Activate a Python virtual environment created by virtualenv or venv.
 If no path is given, the following will be tried:
- ./"(str:join "\n ./" $candidates)"\n"
+  ./"(str:join "\n  ./" $candidates)"\n"
 }
 
 fn activate {
@@ -106,3 +106,13 @@ set edit:completion:arg-completer[venv:activate] = {
     put (pretty-path (path:dir $cfg))
   }
 }
+
+
+set after-chdir = [{|dir|
+  for candidate $candidates {
+    if (is-venv $candidate) {
+      activate $candidate
+      break
+    }
+  }
+}]
