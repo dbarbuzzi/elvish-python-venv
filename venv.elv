@@ -1,3 +1,4 @@
+use os
 use path
 use re
 use str
@@ -85,7 +86,15 @@ fn activate {
   set venv = (path:abs $venv)
   set-env VIRTUAL_ENV $venv
   set prev[paths] = $paths
-  set paths = [(path:join $venv bin) $@paths]
+
+  # determine correct binary folder name
+  if (os:is-dir (path:join $venv bin)) {
+    set paths = [(path:join $venv bin) $@paths]
+  } elif (os:is-dir (path:join $venv Scripts)) {
+    set paths = [(path:join $venv Scripts) $@paths]
+  } else {
+    fail 'venv: unknown binary directory'
+  }
 
   if (not-eq $E:PYTHONHOME '') {
     set prev[pythonhome] = (get-env PYTHONHOME)
@@ -106,7 +115,6 @@ set edit:completion:arg-completer[venv:activate] = {
     put (pretty-path (path:dir $cfg))
   }
 }
-
 
 set after-chdir = [{|dir|
   for candidate $candidates {
